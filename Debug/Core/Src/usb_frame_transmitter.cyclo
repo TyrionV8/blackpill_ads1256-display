@@ -1,0 +1,10 @@
+../Core/Src/usb_frame_transmitter.c:43:6:UsbFrameTransmitter_Initialize	1
+../Core/Src/usb_frame_transmitter.c:62:6:UsbFrameTransmitter_Process	14
+../Core/Src/usb_frame_transmitter.c:173:6:UsbFrameTransmitter_NotifyTransmitComplete	1
+../Core/Src/usb_frame_transmitter.c:179:6:UsbFrameTransmitter_NotifyTransmitAborted	1
+../Core/Src/usb_frame_transmitter.c:185:6:UsbFrameTransmitter_NotifyHostPortState	2
+../Core/Src/usb_frame_transmitter.c:197:6:UsbFrameTransmitter_IsHostPortOpen	1
+../Core/Src/usb_frame_transmitter.c:204:6:UsbFrameTransmitter_NotifyRingBufferFlushed	2
+../Core/Src/usb_frame_transmitter.c:219:6:UsbFrameTransmitter_GetStatistics	1
+../Core/Src/usb_frame_transmitter.c:225:13:UsbFrameTransmitter_BuildBlock	8
+../Core/Src/usb_frame_transmitter.c:293:13:UsbFrameTransmitter_AppendDiagnostics	3

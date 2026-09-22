@@ -6,13 +6,15 @@
 
 /* USER CODE BEGIN Includes */
 #include "application_config.h"
+#include "acquisition_frame.h"
+#include "acquisition_ring_buffer.h"
 #include "adc_ads1256.h"
 #include "display_st7735.h"
 #include "microsecond_delay.h"
 #include "usb_cdc_serial.h"
+#include "usb_frame_transmitter.h"
 
 #include <stdint.h>
-#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,6 +34,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
+static AcquisitionRingBuffer acquisitionRingBuffer;
+
+_Static_assert(ACQUISITION_FRAME_CHANNEL_COUNT ==
+                   ADC_ADS1256_DIFFERENTIAL_CHANNEL_COUNT,
+               "O frame e o ADS1256 precisam ter a mesma quantidade de canais");
 
 /* USER CODE END PV */
 
@@ -106,37 +114,73 @@ int main(void)
   UsbCdcSerial_WriteTextBlocking("# Formato CSV: FRAME,seq,t_us,d1,d2,d3,d4\r\n");
 
   uint32_t sampleSequenceNumber = 0;
+  uint32_t framesAcquired = 0;
+  bool acquisitionSessionActive = false;
+
+  AcquisitionRingBuffer_Initialize(&acquisitionRingBuffer);
+  UsbFrameTransmitter_Initialize(&acquisitionRingBuffer);
 
   while (1)
   {
-    int32_t adcRawSignedValues[ADC_ADS1256_DIFFERENTIAL_CHANNEL_COUNT];
-    uint32_t acquisitionTimestampMicroseconds =
+    if (!UsbFrameTransmitter_IsHostPortOpen())
+    {
+      int32_t ignoredAdcValues[ADC_ADS1256_DIFFERENTIAL_CHANNEL_COUNT];
+
+      if (acquisitionSessionActive)
+      {
+        acquisitionSessionActive = false;
+        AcquisitionRingBuffer_Initialize(&acquisitionRingBuffer);
+        UsbFrameTransmitter_Initialize(&acquisitionRingBuffer);
+      }
+
+      AdcADS1256_ReadDifferentialChannelFrame(ignoredAdcValues);
+      continue;
+    }
+
+    if (!acquisitionSessionActive)
+    {
+      AcquisitionRingBuffer_Initialize(&acquisitionRingBuffer);
+      UsbFrameTransmitter_Initialize(&acquisitionRingBuffer);
+      sampleSequenceNumber = 0U;
+      framesAcquired = 0U;
+      acquisitionSessionActive = true;
+    }
+
+    AcquisitionFrame acquiredFrame;
+
+    acquiredFrame.sequenceNumber = sampleSequenceNumber;
+    acquiredFrame.timestampMicroseconds =
         MicrosecondDelay_GetTimestampMicroseconds();
 
-    AdcADS1256_ReadDifferentialChannelFrame(adcRawSignedValues);
+    AdcADS1256_ReadDifferentialChannelFrame(acquiredFrame.channel);
 
-    char csvLineText[128];
-    int numberOfCharactersWrittenToCsvLine = snprintf(csvLineText,
-                                                       sizeof(csvLineText),
-                                                       "FRAME,%lu,%lu,%ld,%ld,%ld,%ld\r\n",
-                                                       (unsigned long)sampleSequenceNumber,
-                                                       (unsigned long)acquisitionTimestampMicroseconds,
-                                                       (long)adcRawSignedValues[0],
-                                                       (long)adcRawSignedValues[1],
-                                                       (long)adcRawSignedValues[2],
-                                                       (long)adcRawSignedValues[3]);
-
-    if ((numberOfCharactersWrittenToCsvLine > 0) &&
-        (numberOfCharactersWrittenToCsvLine < (int)sizeof(csvLineText)))
+    if (!UsbFrameTransmitter_IsHostPortOpen())
     {
-      uint16_t csvLineLengthInBytes = (uint16_t)numberOfCharactersWrittenToCsvLine;
-
-      UsbCdcSerial_WriteBytesBlocking(csvLineText, csvLineLengthInBytes);
-      HAL_GPIO_TogglePin(APPLICATION_LED_GPIO_PORT,
-                         APPLICATION_LED_GPIO_PIN);
+      acquisitionSessionActive = false;
+      AcquisitionRingBuffer_Initialize(&acquisitionRingBuffer);
+      UsbFrameTransmitter_Initialize(&acquisitionRingBuffer);
+      continue;
     }
 
     sampleSequenceNumber++;
+    framesAcquired++;
+
+    AcquisitionRingBufferPushResult pushResult =
+        AcquisitionRingBuffer_Push(&acquisitionRingBuffer,
+                                   &acquiredFrame);
+
+    if (pushResult == ACQUISITION_RING_BUFFER_PUSH_FLUSHED_BACKLOG)
+    {
+      UsbFrameTransmitter_NotifyRingBufferFlushed();
+    }
+
+    if (UsbFrameTransmitter_Process(
+            MicrosecondDelay_GetTimestampMicroseconds(),
+            framesAcquired))
+    {
+      HAL_GPIO_TogglePin(APPLICATION_LED_GPIO_PORT,
+                         APPLICATION_LED_GPIO_PIN);
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

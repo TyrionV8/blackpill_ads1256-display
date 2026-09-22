@@ -1,0 +1,8 @@
+../Core/Src/acquisition_ring_buffer.c:12:6:AcquisitionRingBuffer_Initialize	1
+../Core/Src/acquisition_ring_buffer.c:22:33:AcquisitionRingBuffer_Push	3
+../Core/Src/acquisition_ring_buffer.c:64:6:AcquisitionRingBuffer_TryPeekAt	2
+../Core/Src/acquisition_ring_buffer.c:83:6:AcquisitionRingBuffer_TryPop	2
+../Core/Src/acquisition_ring_buffer.c:99:10:AcquisitionRingBuffer_GetTailPosition	1
+../Core/Src/acquisition_ring_buffer.c:105:6:AcquisitionRingBuffer_ReleaseTransmitted	2
+../Core/Src/acquisition_ring_buffer.c:124:10:AcquisitionRingBuffer_Count	1
+../Core/Src/acquisition_ring_buffer.c:130:6:AcquisitionRingBuffer_GetStatistics	1

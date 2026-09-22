@@ -23,6 +23,8 @@
 
 /* USER CODE BEGIN INCLUDE */
 
+#include "usb_frame_transmitter.h"
+
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -152,6 +154,7 @@ USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
 static int8_t CDC_Init_FS(void)
 {
   /* USER CODE BEGIN 3 */
+  UsbFrameTransmitter_NotifyHostPortState(false);
   /* Set Application Buffers */
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0);
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
@@ -166,6 +169,8 @@ static int8_t CDC_Init_FS(void)
 static int8_t CDC_DeInit_FS(void)
 {
   /* USER CODE BEGIN 4 */
+  UsbFrameTransmitter_NotifyHostPortState(false);
+  UsbFrameTransmitter_NotifyTransmitAborted();
   return (USBD_OK);
   /* USER CODE END 4 */
 }
@@ -228,8 +233,15 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
     break;
 
     case CDC_SET_CONTROL_LINE_STATE:
+    {
+      const USBD_SetupReqTypedef *setupRequest =
+          (const USBD_SetupReqTypedef *)pbuf;
+      bool dataTerminalReady =
+          (setupRequest->wValue & 0x0001U) != 0U;
 
-    break;
+      UsbFrameTransmitter_NotifyHostPortState(dataTerminalReady);
+      break;
+    }
 
     case CDC_SEND_BREAK:
 
@@ -283,7 +295,12 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 7 */
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
-  if (hcdc->TxState != 0){
+  if (hcdc == NULL)
+  {
+    return USBD_FAIL;
+  }
+  if (hcdc->TxState != 0)
+  {
     return USBD_BUSY;
   }
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
@@ -311,6 +328,7 @@ static int8_t CDC_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
   UNUSED(Buf);
   UNUSED(Len);
   UNUSED(epnum);
+  UsbFrameTransmitter_NotifyTransmitComplete();
   /* USER CODE END 13 */
   return result;
 }

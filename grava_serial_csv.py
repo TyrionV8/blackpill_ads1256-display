@@ -6,7 +6,7 @@ import time
 import serial
 from datetime import datetime
 
-PORTA = "/dev/ttyACM1"
+PORTA = "/dev/ttyACM0"
 BAUDRATE = 115200
 DURACAO_SEGUNDOS = 100
 ARQUIVO_SAIDA = "captura_serial.csv"

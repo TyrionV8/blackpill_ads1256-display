@@ -5,6 +5,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/acquisition_ring_buffer.c \
 ../Core/Src/adc_ads1256.c \
 ../Core/Src/application_error.c \
 ../Core/Src/display_st7735.c \
@@ -17,9 +18,11 @@ C_SRCS += \
 ../Core/Src/syscalls.c \
 ../Core/Src/sysmem.c \
 ../Core/Src/system_stm32f4xx.c \
-../Core/Src/usb_cdc_serial.c 
+../Core/Src/usb_cdc_serial.c \
+../Core/Src/usb_frame_transmitter.c
 
 OBJS += \
+./Core/Src/acquisition_ring_buffer.o \
 ./Core/Src/adc_ads1256.o \
 ./Core/Src/application_error.o \
 ./Core/Src/display_st7735.o \
@@ -32,9 +35,11 @@ OBJS += \
 ./Core/Src/syscalls.o \
 ./Core/Src/sysmem.o \
 ./Core/Src/system_stm32f4xx.o \
-./Core/Src/usb_cdc_serial.o 
+./Core/Src/usb_cdc_serial.o \
+./Core/Src/usb_frame_transmitter.o
 
 C_DEPS += \
+./Core/Src/acquisition_ring_buffer.d \
 ./Core/Src/adc_ads1256.d \
 ./Core/Src/application_error.d \
 ./Core/Src/display_st7735.d \
@@ -47,7 +52,8 @@ C_DEPS += \
 ./Core/Src/syscalls.d \
 ./Core/Src/sysmem.d \
 ./Core/Src/system_stm32f4xx.d \
-./Core/Src/usb_cdc_serial.d 
+./Core/Src/usb_cdc_serial.d \
+./Core/Src/usb_frame_transmitter.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -57,7 +63,6 @@ Core/Src/%.o Core/Src/%.su Core/Src/%.cyclo: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/adc_ads1256.cyclo ./Core/Src/adc_ads1256.d ./Core/Src/adc_ads1256.o ./Core/Src/adc_ads1256.su ./Core/Src/application_error.cyclo ./Core/Src/application_error.d ./Core/Src/application_error.o ./Core/Src/application_error.su ./Core/Src/display_st7735.cyclo ./Core/Src/display_st7735.d ./Core/Src/display_st7735.o ./Core/Src/display_st7735.su ./Core/Src/gpio.cyclo ./Core/Src/gpio.d ./Core/Src/gpio.o ./Core/Src/gpio.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/microsecond_delay.cyclo ./Core/Src/microsecond_delay.d ./Core/Src/microsecond_delay.o ./Core/Src/microsecond_delay.su ./Core/Src/spi.cyclo ./Core/Src/spi.d ./Core/Src/spi.o ./Core/Src/spi.su ./Core/Src/stm32f4xx_hal_msp.cyclo ./Core/Src/stm32f4xx_hal_msp.d ./Core/Src/stm32f4xx_hal_msp.o ./Core/Src/stm32f4xx_hal_msp.su ./Core/Src/stm32f4xx_it.cyclo ./Core/Src/stm32f4xx_it.d ./Core/Src/stm32f4xx_it.o ./Core/Src/stm32f4xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32f4xx.cyclo ./Core/Src/system_stm32f4xx.d ./Core/Src/system_stm32f4xx.o ./Core/Src/system_stm32f4xx.su ./Core/Src/usb_cdc_serial.cyclo ./Core/Src/usb_cdc_serial.d ./Core/Src/usb_cdc_serial.o ./Core/Src/usb_cdc_serial.su
+	-$(RM) ./Core/Src/acquisition_ring_buffer.cyclo ./Core/Src/acquisition_ring_buffer.d ./Core/Src/acquisition_ring_buffer.o ./Core/Src/acquisition_ring_buffer.su ./Core/Src/adc_ads1256.cyclo ./Core/Src/adc_ads1256.d ./Core/Src/adc_ads1256.o ./Core/Src/adc_ads1256.su ./Core/Src/application_error.cyclo ./Core/Src/application_error.d ./Core/Src/application_error.o ./Core/Src/application_error.su ./Core/Src/display_st7735.cyclo ./Core/Src/display_st7735.d ./Core/Src/display_st7735.o ./Core/Src/display_st7735.su ./Core/Src/gpio.cyclo ./Core/Src/gpio.d ./Core/Src/gpio.o ./Core/Src/gpio.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/microsecond_delay.cyclo ./Core/Src/microsecond_delay.d ./Core/Src/microsecond_delay.o ./Core/Src/microsecond_delay.su ./Core/Src/spi.cyclo ./Core/Src/spi.d ./Core/Src/spi.o ./Core/Src/spi.su ./Core/Src/stm32f4xx_hal_msp.cyclo ./Core/Src/stm32f4xx_hal_msp.d ./Core/Src/stm32f4xx_hal_msp.o ./Core/Src/stm32f4xx_hal_msp.su ./Core/Src/stm32f4xx_it.cyclo ./Core/Src/stm32f4xx_it.d ./Core/Src/stm32f4xx_it.o ./Core/Src/stm32f4xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32f4xx.cyclo ./Core/Src/system_stm32f4xx.d ./Core/Src/system_stm32f4xx.o ./Core/Src/system_stm32f4xx.su ./Core/Src/usb_cdc_serial.cyclo ./Core/Src/usb_cdc_serial.d ./Core/Src/usb_cdc_serial.o ./Core/Src/usb_cdc_serial.su ./Core/Src/usb_frame_transmitter.cyclo ./Core/Src/usb_frame_transmitter.d ./Core/Src/usb_frame_transmitter.o ./Core/Src/usb_frame_transmitter.su
 
 .PHONY: clean-Core-2f-Src
-
